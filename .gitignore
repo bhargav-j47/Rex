@@ -1,2 +1,6 @@
 .env
 judge/pyenv
+judge/master/db.sqlite3
+judge/master/api/__pycache__
+judge/master/master/__pycache__
+
