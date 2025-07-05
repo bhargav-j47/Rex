@@ -1,3 +1,22 @@
 from django.db import models
 
 # Create your models here.
+langChoices={
+    'cpp':'cpp',
+    'python':'python'
+}
+
+
+class Submission(models.Model):
+    
+    language=models.CharField()
+    input=models.TextField()
+    exp_result=models.TextField()
+    output=models.TextField()
+    status=models.CharField(max_length=1000,default='submitted')
+    src=models.TextField()
+    time=models.IntegerField(default=0)
+    memory=models.IntegerField(default=0)
+    setLimit=models.CharField(default="no")
+    timeLimit=models.IntegerField(default=3)
+    memLimit=models.IntegerField(default=256000)
