@@ -13,7 +13,7 @@ class Submission(models.Model):
     input=models.TextField()
     exp_result=models.TextField()
     output=models.TextField()
-    status=models.CharField(max_length=1000,default='submitted')
+    status=models.CharField(max_length=1000,default='queued')
     src=models.TextField()
     time=models.IntegerField(default=0)
     memory=models.IntegerField(default=0)

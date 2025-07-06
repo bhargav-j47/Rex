@@ -2,6 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Submission
 from .serializers import checkSerializer,submitSerializer
+from .conn import connection
+
+
 
 class Submit(APIView):
 
@@ -9,10 +12,13 @@ class Submit(APIView):
         sdata=submitSerializer(data=request.data)
         if(sdata.is_valid()):
             obj=sdata.save()
+            conn=connection() #redis/valkey connection
+            if conn=="error":
+                return Response("internal error occured",status=500)
+            conn.lpush('submissionQ',obj.id)
             return Response({"id":obj.id ,'status':obj.status},status=201)
 
         return Response(sdata.errors,status=400)
-
 
 
 class Check(APIView):
