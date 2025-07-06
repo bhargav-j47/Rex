@@ -1,4 +1,5 @@
 .env
+*/.env
 judge/pyenv
 judge/master/db.sqlite3
 judge/master/api/__pycache__
