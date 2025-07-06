@@ -3,5 +3,6 @@
 judge/pyenv
 judge/master/db.sqlite3
 */__pycache__
-*/migrations
+judge/master/master/migrations
+judge/master/api/migrations
 
