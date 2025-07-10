@@ -20,3 +20,10 @@ class Submission(models.Model):
     setLimit=models.CharField(default="no")
     timeLimit=models.IntegerField(default=3)
     memLimit=models.IntegerField(default=256000)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        db_table='Submission'
+
