@@ -16,6 +16,5 @@ def connection():
     
 
 def get_next():
-
     conn=connection()
-    return str(conn.rpop())
+    return int(conn.rpop())

@@ -36,7 +36,7 @@ def getSession():
     Session = sessionmaker(bind=engine)
     session=Session()
     return session
-
+"""
 def get(id):
     session=getSession()
     sub=session.query(Submission).filter_by(id=id).first()
@@ -55,4 +55,4 @@ def update(sub,status,output,time,memory):
     
 
 s=get(2)
-
+"""
