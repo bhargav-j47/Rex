@@ -23,6 +23,20 @@ def writefile(filename,content):
     with open(f"{filename}",'w') as f:
         f.write(content)
 
+def readFile(filename):
+    with open(filename,'r') as f:
+        output=f.read().strip()
+    return output
+    
+
+def parseFile(filename):
+    content={}
+    with open(filename,'r') as f:
+        
+        for line in f:
+            key,value=line.strip(":",1)
+            content[key]=value
+    return content
 
 def initialize_files(sub):
     boxid=sub.id%(10e7)
@@ -62,11 +76,10 @@ def compile(sub,files):
     writefile(compile_output,"")
 
     compile_sc=dir+"/compile"
-    command=f"isolate -b {files.boxid} --cg -p 1000 --run {comp_sc} > {compile_output} "
+    command=f"isolate -b {files.boxid} --cg -p 1000  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} > {compile_output} "
     os.system(command)
 
-    with open(compile_output,'r') as f:
-        output=f.read().strip()
+    output=readFile(compile_output)
 
     return output
 
@@ -86,15 +99,48 @@ def run(sub,files):
         -m {sub.memLimit} \
         -p 5 \
         -f 10000 \
-        -E PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\" \
-        --run {run} <{files.stdin} >{files.stdout} 2>{files.stderr}"
+        -E PATH=\"/bin:/usr/bin\" \
+        --run -- {run} <{files.stdin} >{files.stdout} 2>{files.stderr}"
 
     os.system(command)
 
     return
 
 
+
+def getError(status):
+
+    if(status=="TO"):
+        return "time limit exceeded"
+    elif(status=="SG" or status=="RE"):
+        return "runtime error"  
+    elif(status=="XX"):
+        return "internal error"
+    else:
+        return "unknown error"
+
+
+
 def verify(sub,files):
+
+    metadata=parseFile(files.metadata)
+
+    sub.time=metadata["time"]
+    sub.memory=metadata["max-rss"]
+
+    sub.output=readFile(files.stdout)
+
+    if("status" in metadata):
+        sub.status=getError(metadata["status"])
+    elif(readFile(files.stderr)):
+        sub.status="wrong answer"
+        sub.output=readFile(files.stderr)
+    elif(sub.output==sub.exp_result):
+        sub.status="accepted"
+    else:
+        sub.status="wrong answer"
+
+
     return
 
 def clean(files):
