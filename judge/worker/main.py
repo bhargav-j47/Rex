@@ -3,6 +3,9 @@ from .redis import get_next
 import os
 #testing remains for all worker logic
 
+
+cgState="" #using till memory.events issue gets resolved
+
 class Files:
     def __init__(self,boxid,workdir,dir,src,stdin,stdout,stderr,stdresult,metadata):
         self.boxid = boxid
@@ -48,7 +51,7 @@ def initialize_files(sub):
     stdresult=workdir+"/stdresult"
     metadata=workdir+"/metadata"
 
-    os.system("isolate -b {boxid} --cg --init")
+    os.system(f"isolate -b {boxid} {cgState} --init")
     writefile(stdin,sub.input)
     writefile(stdout,"")
     writefile(metadata,"")
@@ -76,7 +79,7 @@ def compile(sub,files):
     writefile(compile_output,"")
 
     compile_sc=dir+"/compile"
-    command=f"isolate -b {files.boxid} --cg -p 1000  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} > {compile_output} "
+    command=f"isolate -b {files.boxid} {cgState} -p 5  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} > {compile_output} "
     os.system(command)
 
     output=readFile(compile_output)
@@ -91,13 +94,13 @@ def run(sub,files):
     else:
         run="/bin/bash run"
     
-    command=f"isolate -b {files.boxid} -s --cg \
+    command=f"isolate -b {files.boxid} -s {cgState} \
         -M {files.metadata} \
         -t {sub.timeLimit} \
         -w {sub.timeLimit} \
         -x 0 \
         -m {sub.memLimit} \
-        -p 5 \
+        -p 1 \
         -f 10000 \
         -E PATH=\"/bin:/usr/bin\" \
         --run -- {run} <{files.stdin} >{files.stdout} 2>{files.stderr}"
