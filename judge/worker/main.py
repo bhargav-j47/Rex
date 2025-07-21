@@ -63,7 +63,6 @@ def initialize_files(sub):
     if sub.language=="cpp":
         src=dir+"/app.cpp"
 
-    print(src)
     writefile(src,sub.src)
 
     return Files(boxid,workdir,dir,src,stdin,stdout,stderr,stdresult,metadata)
@@ -85,7 +84,6 @@ def compile(sub,files):
     os.system(command)
 
     output=readFile(compile_output)
-    print(output)
     return output
 
 
@@ -114,11 +112,10 @@ def run(sub,files):
 
 
 def getError(status):
-    print(status)
+
     if(status=="TO"):
         return "time limit exceeded"
     elif(status=="SG" or status=="RE"):
-        print(status)
         return "runtime error"  
     elif(status=="XX"):
         return "internal error"
@@ -135,7 +132,7 @@ def verify(sub,files):
     sub.memory=metadata["max-rss"]
 
     sub.output=readFile(files.stdout)
-    print(readFile(files.stderr))
+    
     if("status" in metadata):
         sub.status=getError(metadata["status"])
     elif(readFile(files.stderr)):
@@ -174,7 +171,6 @@ def execute(db_session,redconn):
         return 
     
     run(sub,files)
-    print("done")
     
     verify(sub,files)
     
