@@ -63,6 +63,7 @@ def initialize_files(sub):
     if sub.language=="cpp":
         src=dir+"/app.cpp"
 
+    print(src)
     writefile(src,sub.src)
 
     return Files(boxid,workdir,dir,src,stdin,stdout,stderr,stdresult,metadata)
@@ -74,26 +75,26 @@ def compile(sub,files):
     
     comp_sc=""
     if(sub.language=="cpp"):
-        comp_sc=f"g++ -o app {files.src}"
+        comp_sc=f"/usr/bin/g++ -o app app.cpp"
     
     compile_output=files.workdir+"/compile_output.txt"
     writefile(compile_output,"")
 
     #compile_sc=dir+"/compile"
-    command=f"isolate -b {files.boxid} {cgState} -p 5  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} > {compile_output} "
+    command=f"isolate -b {files.boxid} {cgState} -p5  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} 2>{compile_output} "
     os.system(command)
 
     output=readFile(compile_output)
-
+    print(output)
     return output
 
 
 def run(sub,files):
 
     if(sub.language=="python"):
-        run="/usr/bin/python3 run.py"
+        run="/usr/bin/python3 app.py"
     else:
-        run="/bin/bash run"
+        run="app"
     
     command=f"isolate -b {files.boxid} -s {cgState} \
         -M {files.metadata} \
@@ -101,7 +102,7 @@ def run(sub,files):
         -w {sub.timeLimit} \
         -x 0 \
         -m {sub.memLimit} \
-        -p 1 \
+        -p1 \
         -f 10000 \
         -E PATH=\"/bin:/usr/bin\" \
         --run -- {run} <{files.stdin} >{files.stdout} 2>{files.stderr}"
@@ -113,10 +114,11 @@ def run(sub,files):
 
 
 def getError(status):
-
+    print(status)
     if(status=="TO"):
         return "time limit exceeded"
     elif(status=="SG" or status=="RE"):
+        print(status)
         return "runtime error"  
     elif(status=="XX"):
         return "internal error"
@@ -133,7 +135,7 @@ def verify(sub,files):
     sub.memory=metadata["max-rss"]
 
     sub.output=readFile(files.stdout)
-
+    print(readFile(files.stderr))
     if("status" in metadata):
         sub.status=getError(metadata["status"])
     elif(readFile(files.stderr)):
@@ -148,7 +150,7 @@ def verify(sub,files):
     return
 
 def clean(files):
-    os.system(f"isolate -b {files.boxid} --cg --cleanup")
+    os.system(f"isolate -b {files.boxid} {cgState} --cleanup")
     return
 
 
@@ -165,13 +167,14 @@ def execute(db_session,redconn):
 
     compile_output=compile(sub,files)
 
-    if compile_output:
+    if compile_output and "OK" not in compile_output:
         sub.status="compilation error"
         sub.output=compile_output
         db_session.commit()
         return 
     
     run(sub,files)
+    print("done")
     
     verify(sub,files)
     
@@ -182,10 +185,14 @@ def execute(db_session,redconn):
 
 
 if __name__=="__main__":
-    db_session=getSession()
-    redconn=connection()
+    
     while True:
+        db_session=getSession()
+        redconn=connection()
         execute(db_session,redconn)
+        redconn.close()
+        db_session.close()
+        
 
 
 
