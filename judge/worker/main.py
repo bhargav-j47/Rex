@@ -185,13 +185,10 @@ def execute(db_session,redconn):
 
 
 if __name__=="__main__":
-    
+    db_session=getSession()
+    redconn=connection()
     while True:
-        db_session=getSession()
-        redconn=connection()
         execute(db_session,redconn)
-        redconn.close()
-        db_session.close()
         
 
 
