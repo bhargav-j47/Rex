@@ -1,5 +1,5 @@
-from .model import getSession,Submission
-from .redis import get_next
+from model import getSession,Submission
+from redis import get_next,connection
 import os
 #testing remains for all worker logic
 
@@ -21,7 +21,7 @@ class Files:
 
 def writefile(filename,content):
 
-    os.system(f"touch {filename} && chown $whoami {filename}")
+    os.system(f"touch {filename} && chown $(whoami) {filename}")
     os.system(f"chmod +x {filename}")
     with open(f"{filename}",'w') as f:
         f.write(content)
@@ -37,13 +37,14 @@ def parseFile(filename):
     with open(filename,'r') as f:
         
         for line in f:
-            key,value=line.strip(":",1)
-            content[key]=value
+            if ":" in line:
+                key,value=line.strip().split(":",1)
+                content[key.strip()]=value.strip()
     return content
 
 def initialize_files(sub):
-    boxid=sub.id%(10e7)
-    workdir="/var/lib/isolate/{boxid}"
+    boxid=int(sub.id%(10e7))
+    workdir=f"/var/lib/isolate/{boxid}"
     dir=workdir+"/box"
     stdin=workdir+"/stdin"
     stdout=workdir+"/stdout"
@@ -57,9 +58,9 @@ def initialize_files(sub):
     writefile(metadata,"")
     writefile(stdresult,sub.exp_result)
 
-    if sub.lang=="python":
+    if sub.language=="python":
         src=dir+"/app.py"
-    if sub.lang=="cpp":
+    if sub.language=="cpp":
         src=dir+"/app.cpp"
 
     writefile(src,sub.src)
@@ -78,7 +79,7 @@ def compile(sub,files):
     compile_output=files.workdir+"/compile_output.txt"
     writefile(compile_output,"")
 
-    compile_sc=dir+"/compile"
+    #compile_sc=dir+"/compile"
     command=f"isolate -b {files.boxid} {cgState} -p 5  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} > {compile_output} "
     os.system(command)
 
@@ -151,12 +152,12 @@ def clean(files):
     return
 
 
-def execute(db_session):
-    subid=get_next()
+def execute(db_session,redconn):
+    subid=get_next(redconn)
     if subid==None:
         return
     #db_session=getSession()
-    sub=db_session.query(Submission).filter_by(id=subid).first()
+    sub=db_session.query(Submission).filter_by(id=int(subid)).first()
     sub.status="running"
     db_session.commit()
 
@@ -181,10 +182,10 @@ def execute(db_session):
 
 
 if __name__=="__main__":
-    
+    db_session=getSession()
+    redconn=connection()
     while True:
-        db_session=getSession()
-        execute(db_session)
+        execute(db_session,redconn)
 
 
 

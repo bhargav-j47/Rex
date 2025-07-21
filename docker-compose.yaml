@@ -1,0 +1,48 @@
+
+services:
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB : ${POSTGRES_NAME}
+    
+    
+
+  redis:
+    image: valkey/valkey
+    restart: always
+    shm_size: 128mb
+
+    ports:
+      - ${VALKEY_PORT}:${VALKEY_PORT}
+    
+   
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+
+    restart: always
+    depends_on:
+      - redis
+      - db
+    ports:
+      - "8000:8000"
+
+   
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    restart: always
+    privileged: True
+    depends_on:
+      - api
+    
+

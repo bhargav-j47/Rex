@@ -15,10 +15,10 @@ class Submission(models.Model):
     output=models.TextField()
     status=models.CharField(max_length=1000,default='queued')
     src=models.TextField()
-    time=models.IntegerField(default=0)
+    time=models.FloatField(default=0)
     memory=models.IntegerField(default=0)
     setLimit=models.CharField(default="no")
-    timeLimit=models.IntegerField(default=3)
+    timeLimit=models.FloatField(default=3)
     memLimit=models.IntegerField(default=256000)
 
     def __str__(self):

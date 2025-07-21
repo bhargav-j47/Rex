@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
 HOST=os.getenv("VALKEY_HOST")
 PORT=os.getenv('VALKEY_PORT')
+NAME=os.getenv("VALKEY_NAME")
 
 
 def connection():
@@ -15,6 +16,6 @@ def connection():
         return "error"
     
 
-def get_next():
-    conn=connection()
-    return int(conn.rpop())
+def get_next(conn):
+    #conn=connection()
+    return (conn.rpop(NAME))

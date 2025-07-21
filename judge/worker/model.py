@@ -24,10 +24,10 @@ class Submission(Base):
     output=db.Column(db.String)
     status=db.Column(db.String)
     src=db.Column(db.String)
-    time=db.Column(db.Integer)
+    time=db.Column(db.Float)
     memory=db.Column(db.Integer)
     setLimit=db.Column(db.String)
-    timeLimit=db.Column(db.Integer)
+    timeLimit=db.Column(db.Float)
     memLimit=db.Column(db.Integer)
 
 
