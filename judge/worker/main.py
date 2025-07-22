@@ -52,7 +52,7 @@ def initialize_files(sub):
     stdresult=workdir+"/stdresult"
     metadata=workdir+"/metadata"
 
-    os.system(f"isolate -b {boxid} {cgState} --init")
+    os.system(f"isolate -b {boxid} {cgState} -f100000  --init")
     writefile(stdin,sub.input)
     writefile(stdout,"")
     writefile(metadata,"")
@@ -80,7 +80,7 @@ def compile(sub,files):
     writefile(compile_output,"")
 
     #compile_sc=dir+"/compile"
-    command=f"isolate -b {files.boxid} {cgState} -p5  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} 2>{compile_output} "
+    command=f"isolate -b {files.boxid} {cgState} -p5 -f100000  -E PATH=\"/bin:/usr/bin\" --run -- {comp_sc} 2>{compile_output} "
     os.system(command)
 
     output=readFile(compile_output)
@@ -101,7 +101,7 @@ def run(sub,files):
         -x 0 \
         -m {sub.memLimit} \
         -p1 \
-        -f 10000 \
+        -f100000  \
         -E PATH=\"/bin:/usr/bin\" \
         --run -- {run} <{files.stdin} >{files.stdout} 2>{files.stderr}"
 
@@ -122,8 +122,6 @@ def getError(status):
     else:
         return "unknown error"
 
-
-
 def verify(sub,files):
 
     metadata=parseFile(files.metadata)
@@ -134,10 +132,20 @@ def verify(sub,files):
     sub.output=readFile(files.stdout)
     
     if("status" in metadata):
-        sub.status=getError(metadata["status"])
+        sub.output=readFile(files.stderr)
+
+        if("MemoryError" in sub.output or "bad_alloc" in sub.output):
+            sub.status="memory limit exceeded"
+            sub.output=readFile(files.stdout)
+            sub.memory=sub.memLimit
+
+        else:
+            sub.status=getError(metadata["status"])
+
     elif(readFile(files.stderr)):
         sub.status="wrong answer"
         sub.output=readFile(files.stderr)
+
     elif(sub.output==sub.exp_result):
         sub.status="accepted"
     else:
@@ -159,6 +167,11 @@ def execute(db_session,redconn):
     sub=db_session.query(Submission).filter_by(id=int(subid)).first()
     sub.status="running"
     db_session.commit()
+
+    if(sub.language not in ["python","cpp"]):
+        sub.status="language not supportted"
+        db_session.commit()
+        return
 
     files=initialize_files(sub)
 
