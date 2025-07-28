@@ -26,7 +26,7 @@ class Submission(Base):
     src=db.Column(db.String)
     time=db.Column(db.Float)
     memory=db.Column(db.Integer)
-    setLimit=db.Column(db.String)
+    #setLimit=db.Column(db.String)
     timeLimit=db.Column(db.Float)
     memLimit=db.Column(db.Integer)
 

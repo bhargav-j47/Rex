@@ -6,9 +6,9 @@ class submitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Submission
-        fields=["input","exp_result","language","src","setLimit","timeLimit","memLimit"]
+        fields=["input","exp_result","language","src","timeLimit","memLimit"]
         extra_kwargs = {
-                'Setlimit': {'required': False, 'allow_blank': True},
+                #'Setlimit': {'required': False, 'allow_blank': True},
                 'timeLimit': {'required': False, 'allow_null': True},
                 'memoryLimit': {'required': False, 'allow_null': True}
             }

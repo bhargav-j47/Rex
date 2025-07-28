@@ -17,7 +17,7 @@ class Submission(models.Model):
     src=models.TextField()
     time=models.FloatField(default=0)
     memory=models.IntegerField(default=0)
-    setLimit=models.CharField(default="no")
+    #setLimit=models.CharField(default="no")
     timeLimit=models.FloatField(default=3)
     memLimit=models.IntegerField(default=256000)
 
