@@ -94,11 +94,12 @@ function App() {
     try {
       let intref = setInterval(async () => {
         data = await axios.get(`/api/check?${id}`);
-        setOutput(data['output']);
+        data=JSON.parse(data);
+        setOutput(data.output);
 
         if (output != "running" || output != "queued") {
-          setTime(data['time']);
-          setMem(data['memory']);
+          setTime(data.time);
+          setMem(data.memory);
           return;
         }
       }, 2000)
